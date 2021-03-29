@@ -47,46 +47,29 @@ Télécharger les données OTU des bactéries et des eucaryotes. Le puit 192 n'a
 #Télécharger les matrices
 bac = as.matrix(read.csv("ASV.matrice.SN.csv", header = TRUE, row.names = 1))
 
-
-
 #Rendre les ASV représentatifs
 rownames(bac) = rownames(bac) %>% str_replace("ASV", "bac")
-
 
 #Changer le nom des puits
 colnames(bac) = colnames(bac) %>% str_replace("X", "P_")
 
-
 #Enlver les puits 192 et 348
 bac = subset(bac, select = -c(P_192, P_348))
-
-
 
 #Transformer en phyloseq
 bac = phyloseq(otu_table(bac, taxa_are_rows = TRUE))
 
-
-
 #Retrait des puits ayant une trop faible abondance
 bac = prune_samples(sample_sums(bac)>=1000, bac)
-
-
 
 # #Retrait des ASV qui ont moins de 5 représentants
 bac = filter_taxa(bac, function(x) sum(x) > 5, TRUE)
 
-
-
 #Retrait des ASV qui sont présents dans moins de 3 sites
 bac = filter_taxa(bac, function(x) sum(x!=0) > 3, TRUE)
 
-
-
 #Transformer le phyloseq en data_frame
 bac = as.data.frame(get_taxa(bac))
-
-
-
 ```
 
 
@@ -95,7 +78,6 @@ bac = as.data.frame(get_taxa(bac))
 Les bactéries et eucaryotes les plus abondants seront calculés en additionnant les abondances relative des OTU dans chacun des puits. Les 15 plus abondants seront retenus. La dernière colone qui représente l'abondance relative cumulative est enlevée. 
 
 ```{r}
-
 bac = t(bac)
 
 bac = make_relative(as.matrix(bac))
@@ -107,15 +89,11 @@ bac = t(bac)
 #Ajouter la somme des abondances relatives à la matrice
 bac  = cbind(bac, somme_rel_bac)
 
-
 #Ordonner les ASV selon leur abondance relative
 bac  = bac[order(bac[,ncol(bac)], decreasing = TRUE),]
 
-
 #Enlever la colone avec les sommes relatives et garder les 15 ASV les plus abondants
 bac  = as.data.frame(bac[1:15, -ncol(bac)])
-
-
 ```
 
 
@@ -130,7 +108,6 @@ options(scipen = 99999)
     return(cormat)
   }
 
-  
 #Matrice de corrélation des bactéries
 bac_cor = rcorr(as.matrix(t(bac)), type = "spearman")
 bac_cor_r = get_lower_tri(bac_cor$r)
@@ -140,16 +117,11 @@ bac_p_long = reshape2::melt(bac_cor_p)
 bac_r_long = reshape2::melt(bac_cor_r)
 bac_r_long$p = bac_p_long$value
 bac_r_long$value[is.na(bac_r_long$value)] = 0
-
-
 ```
 
 Visualiser les corrélations
 
 ```{r}
-
-
-
 #Graphique pour les corrélations entre les bactéries
 stars_bac = cut(bac_r_long$p, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("*", "*", "*", ""))
 
